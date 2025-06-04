@@ -25,13 +25,6 @@ jobs:
       - name: Run tests (notifications)
         run: cd notifications && npm run test:cov
 
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
-        with:
-          projectBaseDir: ./notifications
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish notifications package
         run: |
