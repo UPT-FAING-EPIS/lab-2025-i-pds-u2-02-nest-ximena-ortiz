@@ -1,0 +1,56 @@
+name: Package and Publish to GitHub Packages
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-test-sonar-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "21"
+          registry-url: "https://npm.pkg.github.com"
+
+      - name: Install dependencies (notifications)
+        run: cd notifications && npm ci
+
+      - name: Run tests (notifications)
+        run: cd notifications && npm run test:cov
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        with:
+          projectBaseDir: ./notifications
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish notifications package
+        run: |
+          cd notifications
+          npm version patch
+          npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install dependencies (customer-app)
+        run: cd customer-app && npm ci
+
+      - name: Run tests (customer-app)
+        run: cd customer-app && npm run test:cov
+
+      - name: Publish customer-app package
+        run: |
+          cd customer-app
+          npm version patch
+          npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
