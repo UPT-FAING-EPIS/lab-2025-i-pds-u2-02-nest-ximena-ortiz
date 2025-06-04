@@ -22,11 +22,14 @@ jobs:
         with:
           node-version: '21'
 
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Generate documentation
-        run: npx @compodoc/compodoc -p tsconfig.json -d ./documentation
+      - name: Install dependencies and generate docs
+        run: |
+            cd notifications
+            npm ci
+            npx @compodoc/compodoc -p tsconfig.json -d ../docs/notifications
+            cd ../customer-app
+            npm ci
+            npx @compodoc/compodoc -p tsconfig.json -d ../docs/customer-app
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
